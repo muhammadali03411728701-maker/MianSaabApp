@@ -1,97 +1,142 @@
-// --- MIAN SAAB 10 SPORTS CLUB EM (FINAL MASTER SCRIPT) ---
-// Builders: Builders Mian Saab 10 Sports Club
-
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Alert, Dimensions } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  StyleSheet, Text, View, TouchableOpacity, ScrollView, 
+  TextInput, Alert, FlatList, Dimensions, Image 
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NodeCameraView } from 'react-native-nodemediaclient'; // Direct Streaming Engine
+import { NodeCameraView } from 'react-native-nodemediaclient';
+import { Video } from 'expo-av'; // Stable Video Engine for Review
+import * as ImagePicker from 'expo-image-picker';
+
+const { width, height } = Dimensions.get('window');
 
 export default function App() {
-  // 1. DASHBOARD & SETTINGS
-  const [screen, setScreen] = useState('menu');
-  const [clubName, setClubName] = useState("Mian Saab 10 Sports Club EM");
-  const [eventNo, setEventNo] = useState("73");
-  const [streamUrl, setStreamUrl] = useState(""); // 7:30 PM Point: YouTube/FB URL field
+  // --- 1. CORE STATES ---
+  const [screen, setScreen] = useState('home');
+  const [clubName] = useState("Mian Saab 10 Sports Club EM");
+  const [eventNo] = useState("73");
+  const [teams, setTeams] = useState([]);
+  const [score, setScore] = useState({ r: 0, w: 0, b: 0 });
+  const [decision, setDecision] = useState(null);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [streamUrl, setStreamUrl] = useState("");
 
-  // 2. MATCH & INNINGS LOGIC (7:30 PM Update)
-  const [teamA, setTeamA] = useState("");
-  const [teamB, setTeamB] = useState("");
-  const [innings, setInnings] = useState(1);
-  const [score, setScore] = useState(0);
-  const [target, setTarget] = useState(0);
-  const [winner, setWinner] = useState(null);
+  // --- 2. TEAM ENTRY STATE ---
+  const [tName, setTName] = useState('');
+  const [tOwner, setTOwner] = useState('');
+  const [tAddr, setTAddr] = useState('');
+  const [tFee, setTFee] = useState('');
+  const [tPaid, setTPaid] = useState('');
+  const [tImg, setTImg] = useState(null);
 
-  // 3. FINANCIAL LEDGER (Accounts/Pending)
-  const [teamsList, setTeamsList] = useState([]);
-  const [entryForm, setEntryForm] = useState({ name: '', owner: '', addr: '', total: '', paid: '' });
-
-  // --- Functions ---
-  const saveTeam = async () => {
-    const pending = (parseFloat(entryForm.total) || 0) - (parseFloat(entryForm.paid) || 0);
-    const newTeam = { ...entryForm, id: Date.now().toString(), pending: pending };
-    setTeamsList([...teamsList, newTeam]);
-    Alert.alert("Saved", `Team: ${entryForm.name} | Status: ${pending <= 0 ? 'Nil' : pending}`);
+  // --- 3. FUNCTIONS ---
+  const pickImage = async () => {
+    let res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true, aspect: [1, 1], quality: 0.5,
+    });
+    if (!res.canceled) setTImg(res.assets[0].uri);
   };
 
-  // --- Lucky Draws & Tri-Super Over Space ---
-  const runLuckyDraw = (name) => Alert.alert("Lucky Draw", `${name} advanced via Parchi!`);
+  const saveTeam = async () => {
+    const pend = (parseFloat(tFee) || 0) - (parseFloat(tPaid) || 0);
+    const newTeam = { id: Date.now().toString(), name: tName, owner: tOwner, pending: pend, img: tImg };
+    const updatedTeams = [...teams, newTeam];
+    setTeams(updatedTeams);
+    await AsyncStorage.setItem('mian_saab_db', JSON.stringify(updatedTeams));
+    Alert.alert("Success", `Team Saved! Status: ${pend <= 0 ? 'Nil' : pend}`);
+    setTName(''); setTOwner(''); setTImg(null);
+  };
+
+  const applyDecision = (type, color) => {
+    setDecision({ type, color });
+    setIsReviewing(false);
+    setTimeout(() => setDecision(null), 4000);
+  };
+
+  // --- 4. UI SCREENS ---
+  const Header = () => (
+    <View style={styles.header}>
+      <Text style={styles.clubTitle}>{clubName}</Text>
+      <Text style={styles.builder}>Builders: Mian Saab 10 Sports Club</Text>
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* BRANDING HEADER */}
-      <View style={styles.header}>
-        <Text style={styles.clubTitle}>{clubName}</Text>
-        <Text style={styles.builder}>Builders: Mian Saab 10 Sports Club</Text>
-      </View>
-
-      {screen === 'menu' && (
+      <Header />
+      
+      {screen === 'home' ? (
         <ScrollView contentContainerStyle={styles.grid}>
           <MenuCard t="Live Broadcast" i="📹" onPress={() => setScreen('live')} />
-          <MenuCard t="Team Entries" i="📝" onPress={() => setScreen('entry')} />
-          <MenuCard t="Lucky Draws" i="🎟️" onPress={() => setScreen('lucky')} />
-          <MenuCard t="Tri-Super Over" i="🔥" onPress={() => setScreen('tri')} />
-          <MenuCard t="Ledger/Accounts" i="💰" onPress={() => setScreen('ledger')} />
-          <MenuCard t="Match Fixtures" i="🆚" onPress={() => setScreen('fixtures')} />
-          <MenuCard t="JSON Backup" i="☁️" onPress={() => Alert.alert("Data Safe", "Backup synced with Drive")} />
+          <MenuCard t="Team Entry" i="📝" onPress={() => setScreen('entry')} />
+          <MenuCard t="Lucky Draws" i="🎟️" onPress={() => Alert.alert("Lucky Draw", "Qualified via Parchi!")} />
+          <MenuCard t="Tri-Super Over" i="🔥" onPress={() => Alert.alert("Tri-Super Over", "Ready for 3 Teams!")} />
+          <MenuCard t="Ledger" i="💰" onPress={() => setScreen('ledger')} />
+          <MenuCard t="JSON Backup" i="☁️" onPress={() => Alert.alert("Backup", "Copy to Google Drive")} />
         </ScrollView>
-      )}
+      ) : (
+        <View style={{flex: 1}}>
+          <TouchableOpacity onPress={() => setScreen('home')} style={styles.backBtn}><Text>← Exit</Text></TouchableOpacity>
+          
+          {/* LIVE STREAM & REVIEW SCREEN */}
+          {screen === 'live' && (
+            <View style={styles.full}>
+              <NodeCameraView 
+                style={styles.camera} 
+                outputUrl={streamUrl || "rtmp://a.rtmp.youtube.com/live2/KEY"} 
+                camera={{cameraId: 1}} 
+                autopreview={true} 
+              />
+              
+              {/* Overlay Scoreboard */}
+              <View style={styles.scoreOverlay}>
+                <Text style={styles.ovText}>Event #{eventNo} | {clubName}</Text>
+                <Text style={styles.ovScore}>{score.r}/{score.w} ({Math.floor(score.b/6)}.{score.b%6})</Text>
+              </View>
 
-      {/* 7:30 PM Point: LIVE SCREEN WITH URL INPUT */}
-      {screen === 'live' && (
-        <View style={styles.liveContainer}>
-          <TextInput 
-            placeholder="Paste YouTube/FB Stream URL here" 
-            style={styles.urlInput}
-            onChangeText={setStreamUrl}
-            value={streamUrl}
-          />
-          <NodeCameraView 
-            style={styles.camera} 
-            outputUrl={streamUrl} 
-            camera={{cameraId: 1}} 
-            autopreview={true} 
-          />
-          {/* Innings & Target Overlay */}
-          <View style={styles.scoreOverlay}>
-            <Text style={styles.inningsTag}>{innings === 1 ? "First Team Batting" : "Chasing Target"}</Text>
-            <Text style={styles.scoreText}>{score} Runs</Text>
-            {innings === 2 && <Text style={styles.targetText}>Target: {target}</Text>}
-          </View>
-          <TouchableOpacity onPress={() => setScreen('menu')} style={styles.backBtn}><Text>Back</Text></TouchableOpacity>
+              {decision && (
+                <View style={[styles.decBox, {backgroundColor: decision.color}]}>
+                  <Text style={styles.decText}>{decision.type}</Text>
+                </View>
+              )}
+
+              {/* Controls */}
+              <View style={styles.liveControls}>
+                 <TouchableOpacity style={styles.ctrl} onPress={() => setIsReviewing(true)}><Text>Review</Text></TouchableOpacity>
+                 <TouchableOpacity style={styles.ctrl} onPress={() => setScore({...score, r: score.r+4, b: score.b+1})}><Text>4</Text></TouchableOpacity>
+                 <TouchableOpacity style={styles.ctrl} onPress={() => setScore({...score, r: score.r+6, b: score.b+1})}><Text>6</Text></TouchableOpacity>
+                 <TouchableOpacity style={[styles.ctrl, {backgroundColor: 'red'}]} onPress={() => applyDecision('OUT', 'red')}><Text style={{color:'white'}}>W</Text></TouchableOpacity>
+              </View>
+
+              {isReviewing && (
+                <View style={styles.reviewPop}>
+                   <Text style={{fontWeight:'bold', color:'red'}}>SLOW-MO REVIEW MODE</Text>
+                   <View style={styles.row}>
+                      <TouchableOpacity onPress={() => applyDecision('NOT OUT', 'green')} style={styles.decBtn}><Text>NOT OUT</Text></TouchableOpacity>
+                      <TouchableOpacity onPress={() => applyDecision('DEAD BALL', 'grey')} style={styles.decBtn}><Text>DEAD</Text></TouchableOpacity>
+                      <TouchableOpacity onPress={() => setIsReviewing(false)} style={styles.decBtn}><Text>Close</Text></TouchableOpacity>
+                   </View>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* TEAM ENTRY SCREEN */}
+          {screen === 'entry' && (
+            <ScrollView style={styles.padding}>
+              <Text style={styles.title}>Team Registration</Text>
+              <TouchableOpacity onPress={pickImage} style={styles.imageBox}>
+                {tImg ? <Image source={{uri: tImg}} style={styles.fullImg} /> : <Text>+ Add Photo</Text>}
+              </TouchableOpacity>
+              <TextInput placeholder="Team Name" style={styles.input} onChangeText={setTName} />
+              <TextInput placeholder="Owner Name" style={styles.input} onChangeText={setTOwner} />
+              <TextInput placeholder="Total Fee" style={styles.input} keyboardType="numeric" onChangeText={setTFee} />
+              <TextInput placeholder="Paid Amount" style={styles.input} keyboardType="numeric" onChangeText={setTPaid} />
+              <TouchableOpacity style={styles.saveBtn} onPress={saveTeam}><Text style={{color:'white', fontWeight:'bold'}}>CONFIRM ENTRY</Text></TouchableOpacity>
+            </ScrollView>
+          )}
         </View>
-      )}
-
-      {/* TEAM ENTRY SCREEN */}
-      {screen === 'entry' && (
-        <ScrollView style={styles.padding}>
-          <Text style={styles.title}>Team Entry (Event #{eventNo})</Text>
-          <TextInput placeholder="Team Name" style={styles.input} onChangeText={v => setEntryForm({...entryForm, name: v})} />
-          <TextInput placeholder="Owner" style={styles.input} onChangeText={v => setEntryForm({...entryForm, owner: v})} />
-          <TextInput placeholder="Total Entry Fee" style={styles.input} keyboardType="numeric" onChangeText={v => setEntryForm({...entryForm, total: v})} />
-          <TextInput placeholder="Paid Amount" style={styles.input} keyboardType="numeric" onChangeText={v => setEntryForm({...entryForm, paid: v})} />
-          <TouchableOpacity style={styles.saveBtn} onPress={saveTeam}><Text style={{color:'white'}}>Register Team</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => setScreen('menu')}><Text style={{marginTop:20, textAlign:'center'}}>Go Back</Text></TouchableOpacity>
-        </ScrollView>
       )}
     </View>
   );
@@ -106,22 +151,29 @@ const MenuCard = ({t, i, onPress}) => (
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0f3f5' },
-  header: { backgroundColor: '#1B1464', padding: 40, alignItems: 'center' },
-  clubTitle: { color: '#FFC312', fontSize: 20, fontWeight: 'bold' },
-  builder: { color: 'white', fontSize: 10 },
+  header: { backgroundColor: '#1B1464', padding: 40, alignItems: 'center', borderBottomWidth: 4, borderBottomColor: '#FFC312' },
+  clubTitle: { color: '#FFC312', fontSize: 18, fontWeight: 'bold', textAlign: 'center' },
+  builder: { color: 'white', fontSize: 9 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', padding: 15 },
   card: { width: '45%', backgroundColor: 'white', padding: 20, borderRadius: 15, marginBottom: 15, alignItems: 'center', elevation: 5 },
-  cardT: { fontWeight: 'bold', fontSize: 12, marginTop: 10, textAlign: 'center' },
-  liveContainer: { flex: 1, backgroundColor: 'black' },
-  urlInput: { backgroundColor: 'white', padding: 10, margin: 10, borderRadius: 5 },
-  camera: { flex: 1 },
-  scoreOverlay: { position: 'absolute', top: 100, left: 20, backgroundColor: 'rgba(0,0,0,0.6)', padding: 15, borderRadius: 10 },
-  inningsTag: { color: '#FFC312', fontWeight: 'bold', fontSize: 10 },
-  scoreText: { color: 'white', fontSize: 35, fontWeight: 'bold' },
-  targetText: { color: '#2ecc71', fontWeight: 'bold' },
-  backBtn: { position: 'absolute', bottom: 30, left: 20, backgroundColor: 'red', padding: 10, borderRadius: 5 },
-  padding: { padding: 40 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 20, color: '#1B1464' },
+  cardT: { fontWeight: 'bold', fontSize: 11, marginTop: 10, textAlign: 'center' },
+  full: { flex: 1 },
+  camera: { flex: 1, backgroundColor: 'black' },
+  scoreOverlay: { position: 'absolute', top: 50, left: 20, backgroundColor: 'rgba(0,0,0,0.6)', padding: 15, borderRadius: 10 },
+  ovText: { color: '#FFC312', fontSize: 10 },
+  ovScore: { color: 'white', fontSize: 32, fontWeight: 'bold' },
+  liveControls: { position: 'absolute', bottom: 20, width: '100%', flexDirection: 'row', justifyContent: 'space-around' },
+  ctrl: { backgroundColor: 'white', padding: 15, borderRadius: 10, width: 70, alignItems: 'center' },
+  decBox: { position: 'absolute', top: '35%', width: '100%', padding: 40, alignItems: 'center' },
+  decText: { fontSize: 60, fontWeight: 'bold', color: 'white' },
+  reviewPop: { position: 'absolute', bottom: 100, width: '100%', backgroundColor: 'white', padding: 20 },
+  row: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 15 },
+  decBtn: { backgroundColor: '#ddd', padding: 10, borderRadius: 5 },
+  padding: { padding: 30 },
+  title: { fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: '#1B1464' },
   input: { borderBottomWidth: 1, borderColor: '#ccc', marginBottom: 20, padding: 10 },
-  saveBtn: { backgroundColor: '#27ae60', padding: 15, borderRadius: 10, alignItems: 'center' }
+  imageBox: { width: 100, height: 100, backgroundColor: '#eee', borderRadius: 50, justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 20, overflow: 'hidden' },
+  fullImg: { width: '100%', height: '100%' },
+  saveBtn: { backgroundColor: '#27ae60', padding: 15, borderRadius: 10, alignItems: 'center' },
+  backBtn: { marginTop: 50, marginLeft: 20, fontWeight: 'bold' }
 });
