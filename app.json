@@ -4,12 +4,7 @@
     "slug": "mian-saab-10-sports",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "extra": {
-      "eas": {
-        "projectId": "8c30b77a-5eb6-4d34-8d2b-587783940a3c"
-      }
-    },
+    "userInterfaceStyle": "light",
     "android": {
       "package": "com.miansaab10.sports",
       "permissions": [
@@ -18,6 +13,11 @@
         "INTERNET",
         "WRITE_EXTERNAL_STORAGE"
       ]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8c30b77a-5eb6-4d34-8d2b-587783940a3c"
+      }
     }
   }
 }
