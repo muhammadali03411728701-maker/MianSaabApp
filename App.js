@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Alert, Image, FlatList } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, TextInput, Alert, Image } from 'react-native';
 import { Camera } from 'expo-camera';
-import * as ImagePicker from 'expo-image-picker';
 
 export default function App() {
   const [screen, setScreen] = useState('home');
@@ -10,7 +8,6 @@ export default function App() {
   const [innings, setInnings] = useState(1);
   const [target, setTarget] = useState(0);
   const [decision, setDecision] = useState(null);
-  const [teams, setTeams] = useState([]);
 
   // --- Functions ---
   const applyDecision = (type, color) => {
@@ -18,14 +15,8 @@ export default function App() {
     setTimeout(() => setDecision(null), 4000);
   };
 
-  const updateScore = (runs) => {
-    setScore({ ...score, r: score.r + runs, b: score.b + 1 });
-    if (innings === 2 && score.r + runs >= target) Alert.alert("MATCH OVER", "Chasing Team Wins!");
-  };
-
   return (
     <View style={styles.container}>
-      {/* BRANDING HEADER */}
       <View style={styles.header}>
         <Text style={styles.clubTitle}>MIAN SAAB 10 SPORTS CLUB EM</Text>
         <Text style={styles.builder}>Builders: Mian Saab 10 Sports Club</Text>
@@ -35,10 +26,10 @@ export default function App() {
         <ScrollView contentContainerStyle={styles.grid}>
           <TouchableOpacity style={styles.card} onPress={() => setScreen('live')}><Text style={styles.icon}>📹</Text><Text style={styles.cardT}>Live Center</Text></TouchableOpacity>
           <TouchableOpacity style={styles.card} onPress={() => setScreen('entry')}><Text style={styles.icon}>📝</Text><Text style={styles.cardT}>Team Entry</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Lucky Draw", "Team Advanced!")}><Text style={styles.icon}>🎟️</Text><Text style={styles.cardT}>Lucky Draws</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Tri-Super Over", "Ready!")}><Text style={styles.icon}>🔥</Text><Text style={styles.cardT}>Tri-Over</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Lucky Draw", "Team Advanced via Parchi!")}><Text style={styles.icon}>🎟️</Text><Text style={styles.cardT}>Lucky Draws</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Tri-Super Over", "Ready for 3 Teams!")}><Text style={styles.icon}>🔥</Text><Text style={styles.cardT}>Tri-Over</Text></TouchableOpacity>
           <TouchableOpacity style={styles.card} onPress={() => setScreen('ledger')}><Text style={styles.icon}>💰</Text><Text style={styles.cardT}>Accounts</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Backup", "Data Saved to Phone")}><Text style={styles.icon}>☁️</Text><Text style={styles.cardT}>Safety Backup</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Backup", "JSON Data Exported!")}><Text style={styles.icon}>☁️</Text><Text style={styles.cardT}>Safety Backup</Text></TouchableOpacity>
         </ScrollView>
       ) : (
         <View style={{flex: 1}}>
@@ -53,8 +44,8 @@ export default function App() {
               </View>
               {decision && <View style={[styles.decBox, {backgroundColor: decision.color}]}><Text style={styles.decText}>{decision.type}</Text></View>}
               <View style={styles.liveControls}>
-                <TouchableOpacity style={styles.ctrl} onPress={() => updateScore(4)}><Text>4</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.ctrl} onPress={() => updateScore(6)}><Text>6</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.ctrl} onPress={() => setScore({...score, r: score.r+4, b: score.b+1})}><Text>4</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.ctrl} onPress={() => setScore({...score, r: score.r+6, b: score.b+1})}><Text>6</Text></TouchableOpacity>
                 <TouchableOpacity style={[styles.ctrl, {backgroundColor:'red'}]} onPress={() => applyDecision('OUT', 'red')}><Text style={{color:'white'}}>W</Text></TouchableOpacity>
                 <TouchableOpacity style={[styles.ctrl, {backgroundColor:'blue'}]} onPress={() => {setTarget(score.r + 1); setInnings(2); setScore({r:0,w:0,b:0})}}><Text style={{color:'white'}}>End</Text></TouchableOpacity>
               </View>
@@ -63,13 +54,11 @@ export default function App() {
 
           {screen === 'entry' && (
             <ScrollView style={styles.padding}>
-              <Text style={styles.title}>New Team Entry</Text>
+              <Text style={styles.title}>New Team Registration</Text>
               <TextInput placeholder="Team Name" style={styles.input} />
-              <TextInput placeholder="Owner Name" style={styles.input} />
-              <TextInput placeholder="Address" style={styles.input} />
               <TextInput placeholder="Total Fee" style={styles.input} keyboardType="numeric" />
-              <TextInput placeholder="Paid" style={styles.input} keyboardType="numeric" />
-              <TouchableOpacity style={styles.saveBtn} onPress={() => Alert.alert("Success", "Team Saved!")}><Text style={{color:'white', fontWeight:'bold'}}>Register Team</Text></TouchableOpacity>
+              <TextInput placeholder="Paid Amount" style={styles.input} keyboardType="numeric" />
+              <TouchableOpacity style={styles.saveBtn} onPress={() => Alert.alert("Success", "Team Data Saved!")}><Text style={{color:'white', fontWeight:'bold'}}>REGISTER TEAM</Text></TouchableOpacity>
             </ScrollView>
           )}
         </View>
@@ -85,7 +74,7 @@ const styles = StyleSheet.create({
   builder: { color: 'white', fontSize: 9 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', padding: 15 },
   card: { width: '45%', backgroundColor: 'white', padding: 25, borderRadius: 15, marginVertical: 10, alignItems: 'center', elevation: 5 },
-  cardT: { fontWeight: 'bold', fontSize: 11, marginTop: 10 },
+  cardT: { fontWeight: 'bold', fontSize: 10, marginTop: 10 },
   icon: { fontSize: 35 },
   full: { flex: 1, backgroundColor: 'black' },
   camera: { flex: 1 },
