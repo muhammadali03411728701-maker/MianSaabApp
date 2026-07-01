@@ -1,17 +1,15 @@
 {
   "expo": {
-    "name": "Mian Saab 10 Sports Club EM",
-    "slug": "mian-saab-10-sports",
+    "name": "Mian Saab 10 Sports EM",
+    "slug": "miansaab-final-v1",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "android": {
-      "package": "com.miansaab10.sports",
+      "package": "com.miansaab10.final",
       "permissions": [
         "CAMERA",
-        "RECORD_AUDIO",
-        "INTERNET",
-        "WRITE_EXTERNAL_STORAGE"
+        "INTERNET"
       ]
     },
     "extra": {
