@@ -3,12 +3,15 @@
     "name": "Mian Saab 10 Sports EM",
     "slug": "mian-saab-10-sports",
     "version": "1.0.0",
-    "extra": {
-      "eas": { "projectId": "8c30b77a-5eb6-4d34-8d2b-587783940a3c" }
-    },
+    "orientation": "portrait",
     "android": {
       "package": "com.miansaab10.sports",
       "permissions": ["INTERNET"]
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8c30b77a-5eb6-4d34-8d2b-587783940a3c"
+      }
     }
   }
 }
