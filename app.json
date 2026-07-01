@@ -1,17 +1,12 @@
 {
   "expo": {
     "name": "MS 10 Official",
-    "slug": "ms-10-official",
+    "slug": "ms-10-official-final",
     "version": "1.0.0",
     "orientation": "portrait",
     "android": {
-      "package": "com.ms10.official",
+      "package": "com.ms10.finalapp",
       "permissions": ["INTERNET"]
-    },
-    "extra": {
-      "eas": {
-        "projectId": "8b71352c-778f-48d6-9c14-9f28877d6b08"
-      }
     }
   }
 }
