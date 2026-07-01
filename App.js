@@ -9,7 +9,7 @@ export default function App() {
 
   const updateScore = (runs) => {
     setScore({ ...score, r: score.r + runs, b: score.b + 1 });
-    if (innings === 2 && (score.r + runs) >= target) Alert.alert("MS 10", "Match Won by Chasing Team!");
+    if (innings === 2 && (score.r + runs) >= target) Alert.alert("MS 10", "Match Over! Chasing Team Wins.");
   };
 
   return (
@@ -23,9 +23,9 @@ export default function App() {
         <ScrollView contentContainerStyle={styles.grid}>
           <TouchableOpacity style={styles.card} onPress={() => setScreen('score')}><Text style={styles.icon}>🏏</Text><Text style={styles.cardT}>Scoreboard</Text></TouchableOpacity>
           <TouchableOpacity style={styles.card} onPress={() => setScreen('entry')}><Text style={styles.icon}>📝</Text><Text style={styles.cardT}>Team Entry</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Lucky Draw", "Qualified!")}><Text style={styles.icon}>🎟️</Text><Text style={styles.cardT}>Lucky Draws</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("Ready", "Tri-Over Loaded!")}><Text style={styles.icon}>🔥</Text><Text style={styles.cardT}>Tri-Super Over</Text></TouchableOpacity>
-          <TouchableOpacity style={styles.card} onPress={() => setScreen('ledger')}><Text style={styles.icon}>💰</Text><Text style={styles.cardT}>Accounts</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("MS 10", "Lucky Draw Done!")}><Text style={styles.icon}>🎟️</Text><Text style={styles.cardT}>Lucky Draws</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => Alert.alert("MS 10", "Tri-Over Ready!")}><Text style={styles.icon}>🔥</Text><Text style={styles.cardT}>Tri-Super Over</Text></TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => setScreen('ledger')}><Text style={styles.icon}>💰</Text><Text style={styles.cardT}>Ledger</Text></TouchableOpacity>
         </ScrollView>
       ) : (
         <View style={{flex: 1}}>
@@ -41,7 +41,7 @@ export default function App() {
                 <TouchableOpacity style={styles.ctrl} onPress={() => updateScore(4)}><Text>4</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.ctrl} onPress={() => updateScore(6)}><Text>6</Text></TouchableOpacity>
                 <TouchableOpacity style={[styles.ctrl, {backgroundColor:'red'}]} onPress={() => setScore({...score, w: score.w+1, b: score.b+1})}><Text style={{color:'white'}}>W</Text></TouchableOpacity>
-                <TouchableOpacity style={[styles.ctrl, {backgroundColor:'blue'}]} onPress={() => {setTarget(score.r+1); setInnings(2); setScore({r:0,w:0,b:0})}}><Text style={{color:'white'}}>Next</Text></TouchableOpacity>
+                <TouchableOpacity style={[styles.ctrl, {backgroundColor:'blue'}]} onPress={() => {setTarget(score.r+1); setInnings(2); setScore({r:0,w:0,b:0})}}><Text style={{color:'white'}}>Target</Text></TouchableOpacity>
               </View>
             </View>
           )}
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   scoreArea: { flex: 1, padding: 20, justifyContent: 'center' },
   board: { backgroundColor: '#2c3e50', padding: 40, borderRadius: 20, alignItems: 'center' },
   ovInnings: { color: '#FFC312', fontWeight: 'bold' },
-  ovScore: { color: 'white', fontSize: 60, fontWeight: 'bold' },
+  ovScore: { color: 'white', fontSize: 50, fontWeight: 'bold' },
   ovText: { color: 'white', fontSize: 20 },
   controls: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 40 },
   ctrl: { backgroundColor: 'white', padding: 20, borderRadius: 15, width: 75, alignItems: 'center', elevation: 3 },
