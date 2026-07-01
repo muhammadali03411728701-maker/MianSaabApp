@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Mian Saab 10 Sports EM",
-    "slug": "mian-saab-10-sports",
+    "name": "MS 10 Official",
+    "slug": "ms-10-official-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "android": {
-      "package": "com.miansaab10.sports",
-      "permissions": ["INTERNET", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+      "package": "com.miansaab.official",
+      "permissions": ["INTERNET"]
     },
     "extra": {
       "eas": {
