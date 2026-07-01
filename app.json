@@ -1,12 +1,11 @@
 {
   "expo": {
-    "name": "Mian Saab 10 Sports EM",
-    "slug": "miansaab-final-v1",
+    "name": "Mian Saab 10 Sports Club EM",
+    "slug": "mian-saab-10-sports",
     "version": "1.0.0",
     "orientation": "portrait",
-    "userInterfaceStyle": "light",
     "android": {
-      "package": "com.miansaab10.final",
+      "package": "com.miansaab10.sports",
       "permissions": [
         "CAMERA",
         "INTERNET"
