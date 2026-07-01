@@ -4,6 +4,11 @@
     "slug": "ms-10-official",
     "version": "1.0.0",
     "orientation": "portrait",
+    "extra": {
+      "eas": {
+        "projectId": "8c30b77a-5eb6-4d34-8d2b-587783940a3c"
+      }
+    },
     "android": {
       "package": "com.ms10.official",
       "permissions": ["INTERNET"]
